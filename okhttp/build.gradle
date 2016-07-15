@@ -47,6 +47,13 @@ bintray {
     }
 }
 
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
+}
+
 check.dependsOn jacocoTestReport
 
 apply from: "$rootProject.projectDir/gradle/gradle-maven-publish.gradle"
