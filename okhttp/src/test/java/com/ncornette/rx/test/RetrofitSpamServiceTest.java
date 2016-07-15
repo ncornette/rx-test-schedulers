@@ -29,17 +29,15 @@ public class RetrofitSpamServiceTest {
     @Before
     public void setUp() throws Exception {
 
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
-
         rxTestOkhttp = new RxTestOkHttp();
-
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addInterceptor(interceptor)
-                .addInterceptor(rxTestOkhttp.countRequestInterceptor())
-                .build();
-
         rxTestSchedulers = rxTestOkhttp.testSchedulers();
+        rxTestSchedulers.newTestSubscriber(new RetrofitSpamServiceWrapper.LogSpamSubscriber());
+
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        OkHttpClient okHttpClient = rxTestOkhttp.okHttpClient().newBuilder()
+                .addInterceptor(loggingInterceptor)
+                .build();
 
         Retrofit build = new Retrofit.Builder()
                 .client(okHttpClient)
@@ -50,15 +48,11 @@ public class RetrofitSpamServiceTest {
 
         RetrofitSpamService retrofitService = build.create(RetrofitSpamService.class);
 
-        testServiceClient = new RetrofitSpamServiceImpl(
+        testServiceClient = new RetrofitSpamServiceWrapper(
                 rxTestSchedulers.testBackgroundScheduler(),
                 rxTestSchedulers.testForegroundScheduler(),
                 retrofitService
         );
-
-        rxTestSchedulers = rxTestSchedulers.newBuilder()
-                .subscriber(new RetrofitSpamServiceImpl.LogSpamSubscriber())
-                .build();
 
         spamServiceTest = new SpamServiceAssertions(testServiceClient, rxTestSchedulers);
     }

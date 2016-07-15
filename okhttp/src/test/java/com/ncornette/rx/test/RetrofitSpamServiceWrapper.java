@@ -13,15 +13,15 @@ import rx.subjects.PublishSubject;
 /**
  * Created by nic on 11/07/16.
  */
-public class RetrofitSpamServiceImpl implements SpamRXService {
+public class RetrofitSpamServiceWrapper implements SpamRXService {
 
     private final TestScheduler backgroundTestScheduler;
     private final TestScheduler foregroundTestScheduler;
     private RetrofitSpamService retrofitService;
 
-    public RetrofitSpamServiceImpl(TestScheduler backgroundTestScheduler,
-                                   TestScheduler foregroundTestScheduler,
-                                   RetrofitSpamService retrofitService) {
+    public RetrofitSpamServiceWrapper(TestScheduler backgroundTestScheduler,
+                                      TestScheduler foregroundTestScheduler,
+                                      RetrofitSpamService retrofitService) {
         this.backgroundTestScheduler = backgroundTestScheduler;
         this.foregroundTestScheduler = foregroundTestScheduler;
 
