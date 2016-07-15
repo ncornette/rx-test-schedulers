@@ -1,0 +1,17 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+}
+
+apply plugin: 'jacoco'
+apply plugin: 'findbugs'
+
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+apply from: rootProject.file('dependencies.gradle')

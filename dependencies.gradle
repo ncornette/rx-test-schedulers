@@ -1,0 +1,25 @@
+ext {
+  sourceCompatibilityVersion = JavaVersion.VERSION_1_7
+  targetCompatibilityVersion = JavaVersion.VERSION_1_7
+  okhttp3Version = '3.2.0'
+  retrofitVersion = '2.0.2'
+
+    dep = [
+            retrofitRxAdapter     : "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion",
+            retrofit              : "com.squareup.retrofit2:retrofit:$retrofitVersion",
+            retrofitGsonConverter : "com.squareup.retrofit2:converter-gson:$retrofitVersion",
+
+            okhttp3               : "com.squareup.okhttp3:okhttp:$okhttp3Version",
+            okhttp3Debug          : "com.squareup.okhttp3:logging-interceptor:$okhttp3Version",
+            mockWebServer         : "com.squareup.okhttp3:mockwebserver:$okhttp3Version",
+
+            rxJava                : "io.reactivex:rxjava:1.1.6",
+            rxJavaString          : "io.reactivex:rxjava-string:1.1.0",
+
+            junit                 : "junit:junit:4.11",
+            assertJ               : "org.assertj:assertj-core:2.2.0",
+            mockito               : "org.mockito:mockito-core:1.9.5",
+    ]
+
+    isCi = "true".equals(System.getenv('CI'))
+}

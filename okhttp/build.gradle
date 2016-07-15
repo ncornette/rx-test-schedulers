@@ -1,0 +1,52 @@
+plugins {
+    id "com.jfrog.bintray" version "1.5"
+}
+
+apply plugin: 'java'
+apply plugin: 'jacoco'
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    compile dep.rxJava
+    compile dep.rxJavaString
+
+    compile dep.junit
+    compile dep.assertJ
+    compile dep.mockito
+
+    compile dep.okhttp3
+    compile dep.okhttp3Debug
+    compile dep.mockWebServer
+
+    testCompile dep.retrofit
+    testCompile dep.retrofitGsonConverter
+    testCompile dep.retrofitRxAdapter
+
+    compile project(":schedulers")
+
+    testCompile project(":test")
+}
+
+bintray {
+    dryRun = false
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+    publications = ['mavenJava']
+    pkg {
+        repo = 'maven'
+        name = "${POM_ARTIFACT_ID}"
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/ncornette/rx-test-schedulers.git'
+        version {
+            name= "${VERSION_NAME}"
+        }
+    }
+}
+
+check.dependsOn jacocoTestReport
+
+apply from: "$rootProject.projectDir/gradle/gradle-maven-publish.gradle"
