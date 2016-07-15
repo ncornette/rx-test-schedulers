@@ -166,7 +166,7 @@ public class RxTestSchedulers {
         return subscriberWrapper.subscriber();
     }
 
-    public TestSubscriber<? super Object> newTestSubscriber(Subscriber<? super Object> subscriber) {
+    public TestSubscriber<Object> newTestSubscriber(Subscriber<Object> subscriber) {
         return subscriberWrapper.subscriber(subscriber);
     }
 
@@ -196,7 +196,7 @@ public class RxTestSchedulers {
             return this;
         }
 
-        public Builder subscriber(Subscriber<? super Object> val) {
+        public Builder subscriber(Subscriber<Object> val) {
             delegateSubscriber = val;
             return this;
         }
