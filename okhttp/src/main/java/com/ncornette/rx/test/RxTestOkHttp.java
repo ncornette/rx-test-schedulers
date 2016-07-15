@@ -64,7 +64,7 @@ public final class RxTestOkHttp {
                 .join(StringObservable.using(new StringObservable.UnsafeFunc0<Reader>() {
                     @Override
                     public Reader call() throws Exception {
-                        return new InputStreamReader(okHttpClient.getClass()
+                        return new InputStreamReader(resourceFilePath.getClass()
                                 .getResourceAsStream(resourceFilePath));
                     }
                 }, new Func1<Reader, Observable<String>>() {
@@ -80,6 +80,10 @@ public final class RxTestOkHttp {
 
     public void enqueueResponse(String s) throws FileNotFoundException {
         mockWebServer.enqueue(new MockResponse().setBody(s));
+    }
+
+    public OkHttpClient okHttpClient() {
+        return okHttpClient;
     }
 
     public RxTestSchedulers testSchedulers() {
