@@ -227,8 +227,7 @@ public class RxTestSchedulers {
         private TestSubscriber<Object> testSubscriber;
 
         public TestSubscriberWrapper(Subscriber<Object> subscriber) {
-            this.delegateSubscriber = subscriber;
-            testSubscriber = getObjectTestSubscriber(delegateSubscriber);
+            testSubscriber = getObjectTestSubscriber(subscriber);
         }
 
         public TestSubscriber<Object> subscriber() {
@@ -241,6 +240,7 @@ public class RxTestSchedulers {
         }
 
         private TestSubscriber<Object> getObjectTestSubscriber(Subscriber<Object> subscriber) {
+            this.delegateSubscriber = subscriber;
             if (subscriber != null) {
                 return TestSubscriber.create(subscriber);
             } else {
