@@ -12,6 +12,8 @@ import rx.Observable;
 import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class SpamServiceAssertions {
 
     protected SpamRXService testServiceClient;
@@ -30,13 +32,13 @@ public class SpamServiceAssertions {
                 .doOnNext(new Action1<List<Spam>>() {
                     @Override
                     public void call(List<Spam> spams) {
-                        Assertions.assertThat(spams).hasSize(6);
+                        assertThat(spams).hasSize(6);
                     }
                 })
                 .subscribe(rxTestSchedulers.testSubscriber());
 
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
 
         rxTestSchedulers.testSubscriber().assertCompleted();
 
@@ -44,15 +46,15 @@ public class SpamServiceAssertions {
                 .doOnNext(new Action1<List<Spam>>() {
                     @Override
                     public void call(List<Spam> spams) {
-                        Assertions.assertThat(spams).hasSize(12);
+                        assertThat(spams).hasSize(12);
                     }
                 })
                 .subscribe(rxTestSchedulers.newTestSubscriber());
 
         rxTestSchedulers.testSubscriber().assertNotCompleted();
 
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
 
         rxTestSchedulers.testSubscriber().assertCompleted();
     }
@@ -66,28 +68,28 @@ public class SpamServiceAssertions {
         rxTestSchedulers.triggerBackgroundRequests();
 
         pagePublishSubject.onNext(1);
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
 
         pagePublishSubject.onNext(1); // SAME PAGE
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(0);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(0);
 
         pagePublishSubject.onNext(2);
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
 
         pagePublishSubject.onNext(2); // SAME PAGE
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(0);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(0);
 
         pagePublishSubject.onNext(2); // SAME PAGE
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(0);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(0);
 
         pagePublishSubject.onNext(3);
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
     }
 
     @Test
@@ -100,16 +102,16 @@ public class SpamServiceAssertions {
         rxTestSchedulers.triggerBackgroundRequests();
 
         pagePublishSubject.onNext(1);
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
 
         pagePublishSubject.onNext(2);
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
 
         pagePublishSubject.onNext(3);
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
     }
 
     public void assertCompletesAtFirstEmptyList() throws Exception {
@@ -123,24 +125,24 @@ public class SpamServiceAssertions {
         pagePublishSubject.onNext(1);
         pagePublishSubject.onNext(2);
         pagePublishSubject.onNext(3);
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(3);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(3);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(3);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(3);
 
         rxTestSchedulers.testSubscriber().assertNotCompleted();
 
         pagePublishSubject.onNext(4);
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(0);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(0);
 
         rxTestSchedulers.testSubscriber().assertCompleted();
 
         pagePublishSubject.onNext(5);
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(0);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(0);
 
         pagePublishSubject.onNext(6);
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(0);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(0);
     }
 
     public void assertCachedResult() throws Exception {
@@ -155,15 +157,15 @@ public class SpamServiceAssertions {
         pagePublishSubject.onNext(1);
         pagePublishSubject.onNext(2);
         pagePublishSubject.onNext(3);
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(3);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(3);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(3);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(3);
 
         rxTestSchedulers.testSubscriber().assertNotCompleted();
 
         listObservable.subscribe(rxTestSchedulers.testSubscriber());
 
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(3);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(3);
 
     }
 
@@ -180,15 +182,15 @@ public class SpamServiceAssertions {
         pagePublishSubject.onNext(2);
         pagePublishSubject.onNext(3);
         pagePublishSubject.onNext(4);
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(4);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(3);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(4);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(3);
 
         rxTestSchedulers.testSubscriber().assertCompleted();
 
         listObservable.subscribe(rxTestSchedulers.newTestSubscriber());
 
-        Assertions.assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
-        Assertions.assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(3);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(3);
     }
 
 }

@@ -1,9 +1,16 @@
 package com.ncornette.rx.test;
 
+import com.ncornette.rx.test.service.SpamRXService;
+
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
+import rx.functions.Action1;
 import rx.functions.Func0;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MockSpamServiceTest {
 
@@ -31,6 +38,25 @@ public class MockSpamServiceTest {
 
         spamServiceTest = new SpamServiceAssertions(testServiceClient, rxTestSchedulers);
     }
+
+    @Test
+    public void testCustom() throws Exception {
+
+        testServiceClient.latestSpams(6)
+                .doOnNext(new Action1<List<SpamRXService.Spam>>() {
+                    @Override
+                    public void call(List<SpamRXService.Spam> spams) {
+                        assertThat(spams).hasSize(6);
+                    }
+                })
+                .subscribe(rxTestSchedulers.testSubscriber());
+
+        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
+
+        rxTestSchedulers.testSubscriber().assertCompleted();
+    }
+
 
     @Test
     public void test() throws Exception {

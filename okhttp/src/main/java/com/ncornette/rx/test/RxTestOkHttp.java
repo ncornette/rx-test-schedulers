@@ -121,13 +121,13 @@ public final class RxTestOkHttp {
         }
 
         public Builder countRequestInterceptor(CountRequestInterceptor val) {
-            if (val == null) throw new NullPointerException("countRequestInterceptor == null");
+            if (val == null) throw new IllegalArgumentException("[countRequestInterceptor] expected not to be null");
             countRequestInterceptor = val;
             return this;
         }
 
         public Builder rxTestSchedulers(RxTestSchedulers val) {
-            if (val == null) throw new NullPointerException("rxTestSchedulers == null");
+            if (val == null) throw new IllegalArgumentException("[rxTestSchedulers] expected not to be null");
             rxTestSchedulers = val;
             return this;
         }

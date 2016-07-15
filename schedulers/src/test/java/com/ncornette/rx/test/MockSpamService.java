@@ -58,7 +58,7 @@ public class MockSpamService implements SpamRXService {
                 .observeOn(foregroundTestScheduler);
     }
 
-    Observable<List<Spam>> listOfSpams(int count) {
+    private Observable<List<Spam>> listOfSpams(int count) {
         return Observable
                 .range(0, count)
                 .map(new Func1<Integer, Spam>() {
