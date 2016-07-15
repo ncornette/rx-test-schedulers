@@ -80,27 +80,27 @@ public class RxTestSchedulers {
         System.out.println("┗━━━━━━━━━━━━━━━━━━━━━━");
     }
 
-    protected int triggerForegroundEvents(String s) throws OnErrorEventsException {
-        int beforeCount = getForegroundEventsCount();
+    public int triggerForegroundEvents(String s) throws OnErrorEventsException {
+        int beforeCount = foregroundEventsCount();
         int beforeErrorCount = testSubscriber().getOnErrorEvents().size();
 
         triggerForegroundActions(s);
 
         int afterErrorCount = testSubscriber().getOnErrorEvents().size();
         assertNoOnErrorEvents(beforeErrorCount, afterErrorCount);
-        int afterCount = getForegroundEventsCount();
+        int afterCount = foregroundEventsCount();
         return afterCount - beforeCount;
     }
 
-    protected int triggerBackgroundRequests(String s) throws OnErrorEventsException {
-        int beforeCount = getBackgroundEventsCount();
+    public int triggerBackgroundRequests(String s) throws OnErrorEventsException {
+        int beforeCount = backgroundEventsCount();
         int beforeErrorCount = testSubscriber().getOnErrorEvents().size();
 
         triggerBackgroundActions(s);
 
         int afterErrorCount = testSubscriber().getOnErrorEvents().size();
         assertNoOnErrorEvents(beforeErrorCount, afterErrorCount);
-        int afterCount = getBackgroundEventsCount();
+        int afterCount = backgroundEventsCount();
         return afterCount - beforeCount;
     }
 
@@ -112,11 +112,11 @@ public class RxTestSchedulers {
         }
     }
 
-    protected int getBackgroundEventsCount() {
+    protected int backgroundEventsCount() {
         return backgroundEventsCount.call();
     }
 
-    protected int getForegroundEventsCount() {
+    protected int foregroundEventsCount() {
         return testSubscriber().getOnNextEvents().size();
     }
 
@@ -128,7 +128,7 @@ public class RxTestSchedulers {
         return triggerForegroundEvents("");
     }
 
-    protected Throwable triggerForegroundEventsWithError() {
+    public Throwable triggerForegroundEventsWithError() {
         try {
             triggerForegroundEvents("");
         } catch (OnErrorEventsException e) {
@@ -137,7 +137,7 @@ public class RxTestSchedulers {
         return null;
     }
 
-    protected Throwable triggerBackgroundRequestsWithError() {
+    public Throwable triggerBackgroundRequestsWithError() {
         try {
             triggerBackgroundRequests("");
         } catch (OnErrorEventsException e) {
@@ -145,10 +145,6 @@ public class RxTestSchedulers {
         }
         return null;
     }
-
-    //protected void resetTestSubscriber() {
-    //    subscriberWrapper = new TestSubscriber<>(new LogSubscriber<>());
-    //}
 
     public TestScheduler testForegroundScheduler() {
         return foregroundScheduler;
@@ -170,7 +166,7 @@ public class RxTestSchedulers {
         return subscriberWrapper.subscriber(subscriber);
     }
 
-    protected class OnErrorEventsException extends Exception {
+    public static class OnErrorEventsException extends Exception {
         public OnErrorEventsException(String message, Throwable cause) {
             super(message, cause);
         }
