@@ -1,6 +1,5 @@
 package com.ncornette.rx.test;
 
-import com.ncornette.rx.test.RetrofitSpamServiceWrapper.LogSpamSubscriber;
 import com.ncornette.rx.test.service.SpamRXService;
 
 import org.junit.Before;
@@ -31,8 +30,6 @@ public class RetrofitSpamServiceTest {
         // testing schedulers
         rxTestOkhttp = new RxTestOkHttp();
         rxTestSchedulers = rxTestOkhttp.testSchedulers();
-
-        rxTestSchedulers.newTestSubscriber(new LogSpamSubscriber());
 
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
