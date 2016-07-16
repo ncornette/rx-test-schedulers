@@ -26,7 +26,7 @@ public final class RxTestOkHttp {
     private final RxTestSchedulers rxTestSchedulers;
 
     public RxTestOkHttp() {
-        this(builder().build().newBuilder());
+        this(new Builder().build().newBuilder());
     }
 
     private RxTestOkHttp(Builder builder) {

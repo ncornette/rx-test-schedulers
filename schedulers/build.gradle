@@ -18,9 +18,6 @@ dependencies {
     compile dep.assertJ
     compile dep.mockito
 
-    compile dep.okhttp3
-    compile dep.mockWebServer
-
     testCompile project(":test")
 }
 

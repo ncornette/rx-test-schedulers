@@ -18,6 +18,7 @@ public class RxTestSchedulers {
     private final TestScheduler backgroundScheduler;
     private final TestSubscriberWrapper subscriberWrapper;
     private final Func0<Integer> backgroundEventsCount;
+    private final Logger logger;
 
     public RxTestSchedulers() {
         this(builder().build().newBuilder());
@@ -28,6 +29,7 @@ public class RxTestSchedulers {
         backgroundScheduler = builder.backgroundScheduler;
         subscriberWrapper = builder.subscriberWrapper;
         backgroundEventsCount = builder.backgroundEventsCount;
+        logger = builder.logger;
     }
 
     public static Builder builder() {
@@ -46,38 +48,44 @@ public class RxTestSchedulers {
         builder.subscriberWrapper = copy.subscriberWrapper;
         builder.backgroundEventsCount = copy.backgroundEventsCount;
         builder.delegateSubscriber = copy.subscriberWrapper.delegateSubscriber;
+        builder.logger = copy.logger;
         return builder;
     }
 
     private void triggerBackgroundActions(String title) {
-        System.out.println("┌┄┄┄┄┄┄┄┄┄┄");
-        System.out.println("┆ BACKGROUND: " + title);
-        System.out.println("├┄┄┄┄┄┄┄┄┄┄");
-        System.out.println("┆  ");
+        logger.d("┌┄┄┄┄┄┄┄┄┄┄");
+        if (title != null && !title.isEmpty()) {
+            logger.v("┆ " + title);
+            logger.v("├┄┄┄┄┄┄┄┄┄┄");
+        }
+        logger.i("┆  ");
         long startTime = System.nanoTime();
         testBackgroundScheduler().triggerActions();
         long elapsed = System.nanoTime() - startTime;
         testBackgroundScheduler().advanceTimeBy(elapsed, TimeUnit.NANOSECONDS);
-        System.out.println("┆  ");
-        System.out.println(MessageFormat.format("┆  current: {0}ms", TimeUnit.NANOSECONDS.toMillis(elapsed)));
-        System.out.println(MessageFormat.format("┆  total  : {0}ms", testBackgroundScheduler().now()));
-        System.out.println("└┄┄┄┄┄┄┄┄┄┄");
+        logger.i("┆  ");
+        logger.i("┆ Background: ");
+        logger.i("┆  current: {0}ms", TimeUnit.NANOSECONDS.toMillis(elapsed));
+        logger.i("┆  total  : {0}ms", testBackgroundScheduler().now());
+        logger.d("└┄┄┄┄┄┄┄┄┄┄");
     }
 
     private void triggerForegroundActions(String title) {
-        System.out.println("┏━━━━━━━━━━━━━━━━━━━━━━");
-        System.out.println("┃ MAIN:  " + title);
-        System.out.println("┣━━━━━━━━━━━━━━━━━━━━━━");
-        System.out.println("┃   ");
+        logger.d("┏━━━━━━━━━━━━━━━━━━━━━━");
+        if (title != null && !title.isEmpty()) {
+            logger.v("┃ " + title);
+            logger.v("┣━━━━━━━━━━━━━━━━━━━━━━");
+        }
+        logger.i("┃   ");
         long startTime = System.nanoTime();
         testForegroundScheduler().triggerActions();
         long elapsed = System.nanoTime() - startTime;
         testForegroundScheduler().advanceTimeBy(elapsed, TimeUnit.NANOSECONDS);
-        System.out.println("┃   ");
-        System.out.println(MessageFormat.format("┃  current: {0}ms", TimeUnit.NANOSECONDS.toMillis(elapsed)));
-        System.out.println(MessageFormat.format("┃  total  : {0}ms", testForegroundScheduler().now()));
-        System.out.println("┃   ");
-        System.out.println("┗━━━━━━━━━━━━━━━━━━━━━━");
+        logger.i("┃   ");
+        logger.i("┃ Main: ");
+        logger.i("┃  current: {0}ms", TimeUnit.NANOSECONDS.toMillis(elapsed));
+        logger.i("┃  total  : {0}ms", testForegroundScheduler().now());
+        logger.d("┗━━━━━━━━━━━━━━━━━━━━━━");
     }
 
     public int triggerForegroundEvents(String s) throws OnErrorEventsException {
@@ -166,6 +174,10 @@ public class RxTestSchedulers {
         return subscriberWrapper.subscriber(subscriber);
     }
 
+    public Logger logger() {
+        return logger;
+    }
+
     public static class OnErrorEventsException extends Exception {
         public OnErrorEventsException(String message, Throwable cause) {
             super(message, cause);
@@ -178,6 +190,7 @@ public class RxTestSchedulers {
         private TestSubscriberWrapper subscriberWrapper;
         private Func0<Integer> backgroundEventsCount;
         private Subscriber<Object> delegateSubscriber;
+        private Logger logger;
 
         private Builder() {
         }
@@ -194,6 +207,11 @@ public class RxTestSchedulers {
 
         public Builder subscriber(Subscriber<Object> val) {
             delegateSubscriber = val;
+            return this;
+        }
+
+        public Builder logger(Logger val) {
+            logger = val;
             return this;
         }
 
@@ -215,7 +233,11 @@ public class RxTestSchedulers {
                 backgroundScheduler = new TestScheduler();
             }
 
-            subscriberWrapper = new TestSubscriberWrapper(delegateSubscriber);
+            if (logger == null) {
+                logger = new Logger();
+            }
+
+            subscriberWrapper = new TestSubscriberWrapper(delegateSubscriber, logger);
 
             return new RxTestSchedulers(this);
         }
@@ -223,10 +245,12 @@ public class RxTestSchedulers {
 
     private static class TestSubscriberWrapper {
 
+        private final Logger logger;
         private Subscriber<Object> delegateSubscriber;
         private TestSubscriber<Object> testSubscriber;
 
-        public TestSubscriberWrapper(Subscriber<Object> subscriber) {
+        public TestSubscriberWrapper(Subscriber<Object> subscriber, Logger logger) {
+            this.logger = logger;
             testSubscriber = getObjectTestSubscriber(subscriber);
         }
 
@@ -240,11 +264,79 @@ public class RxTestSchedulers {
         }
 
         private TestSubscriber<Object> getObjectTestSubscriber(Subscriber<Object> subscriber) {
-            this.delegateSubscriber = subscriber;
-            if (subscriber != null) {
-                return TestSubscriber.create(subscriber);
-            } else {
-                return TestSubscriber.create();
+            return TestSubscriber.create(new LogSubscriber(logger, subscriber));
+        }
+    }
+
+    /**
+     * Created by nic on 16/07/16.
+     */
+
+    public static class Logger {
+
+        private int currentLevelValue;
+        public Logger() {
+            this.currentLevelValue = Level.DEBUG.value;
+        }
+        public void v(String s) {
+            log(Level.VERBOSE, s);
+        }
+        public void v(String s, Object... o) {
+            log(Level.VERBOSE, s, o);
+        }
+        public void d(String s) {
+            log(Level.DEBUG, s);
+        }
+        public void d(String s, Object... o) {
+            log(Level.DEBUG, s, o);
+        }
+        public void i(String s) {
+            log(Level.INFO, s);
+        }
+        public void i(String s, Object... o) {
+            log(Level.INFO, s, o);
+        }
+        public void e(String s) {
+            log(Level.ERROR, s);
+        }
+        public void e(String s, Object... o) {
+            log(Level.ERROR, s, o);
+        }
+
+        private void log(Level level, String s) {
+            if(currentLevelValue >= level.value) {
+                if (level.value > Level.ERROR.value) {
+                    System.out.println(s);
+                } else {
+                    System.err.println(s);
+                }
+            }
+        }
+
+        private void log(Level level, String s, Object... o) {
+            if(currentLevelValue >= level.value) {
+                if (level.value > Level.ERROR.value) {
+                    System.out.println(MessageFormat.format(s, o));
+                } else {
+                    System.err.println(MessageFormat.format(s, o));
+                }
+            }
+        }
+
+        public void level(Level currentLevel) {
+            this.currentLevelValue = currentLevel.value;
+        }
+
+        public enum Level {
+            ERROR(0),
+            INFO(1),
+            DEBUG(2),
+            VERBOSE(3);
+
+            private int value;
+
+            Level(int value) {
+                this.value = value;
             }
         }
     }

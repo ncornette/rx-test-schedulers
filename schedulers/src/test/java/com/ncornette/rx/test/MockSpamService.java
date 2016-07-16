@@ -86,21 +86,4 @@ public class MockSpamService implements SpamRXService {
         return requestCount;
     }
 
-    public static class LogSpamSubscriber extends Subscriber<Object> {
-        @Override
-        public void onCompleted() {
-            System.out.println("--> onCompleted.");
-        }
-
-        @Override
-        public void onError(Throwable e) {
-            System.out.println("--> onError: " + e);
-        }
-
-        @Override
-        public void onNext(Object o) {
-            System.out.println("--> onNext: " + o);
-        }
-    }
-
 }

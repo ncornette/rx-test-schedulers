@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+import rx.Subscriber;
 import rx.functions.Action1;
 import rx.functions.Func0;
 
@@ -22,7 +23,6 @@ public class MockSpamServiceTest {
     public void setUp() throws Exception {
 
         rxTestSchedulers = RxTestSchedulers.builder()
-                .subscriber(new MockSpamService.LogSpamSubscriber())
                 .backgroundEventsCount(new Func0<Integer>() {
                     @Override
                     public Integer call() {
@@ -30,6 +30,8 @@ public class MockSpamServiceTest {
                     }
                 })
                 .build();
+
+        rxTestSchedulers.logger().level(RxTestSchedulers.Logger.Level.VERBOSE);
 
         testServiceClient = new MockSpamService(
                 rxTestSchedulers.testBackgroundScheduler(),
@@ -41,7 +43,6 @@ public class MockSpamServiceTest {
 
     @Test
     public void testCustom() throws Exception {
-
         testServiceClient.latestSpams(6)
                 .doOnNext(new Action1<List<SpamRXService.Spam>>() {
                     @Override
@@ -51,8 +52,8 @@ public class MockSpamServiceTest {
                 })
                 .subscribe(rxTestSchedulers.testSubscriber());
 
-        assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
-        assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerBackgroundRequests("Generate 6 Spams")).isEqualTo(1);
+        assertThat(rxTestSchedulers.triggerForegroundEvents("List of 6 Spams")).isEqualTo(1);
 
         rxTestSchedulers.testSubscriber().assertCompleted();
     }
