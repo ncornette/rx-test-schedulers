@@ -1,13 +1,12 @@
 package com.ncornette.rx.test;
 
-import com.ncornette.rx.test.service.SpamRXService;
+import com.ncornette.rx.test.service.SpamRXService.Spam;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 
-import rx.Subscriber;
 import rx.functions.Action1;
 import rx.functions.Func0;
 
@@ -44,13 +43,13 @@ public class MockSpamServiceTest {
     @Test
     public void testCustom() throws Exception {
         testServiceClient.latestSpams(6)
-                .doOnNext(new Action1<List<SpamRXService.Spam>>() {
+                .doOnNext(new Action1<List<Spam>>() {
                     @Override
-                    public void call(List<SpamRXService.Spam> spams) {
+                    public void call(List<Spam> spams) {
                         assertThat(spams).hasSize(6);
                     }
                 })
-                .subscribe(rxTestSchedulers.testSubscriber());
+                .subscribe(rxTestSchedulers.newTestSubscriber());
 
         assertThat(rxTestSchedulers.triggerBackgroundRequests("Generate 6 Spams")).isEqualTo(1);
         assertThat(rxTestSchedulers.triggerForegroundEvents("List of 6 Spams")).isEqualTo(1);
