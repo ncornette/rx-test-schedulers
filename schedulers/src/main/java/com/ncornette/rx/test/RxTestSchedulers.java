@@ -19,7 +19,7 @@ public class RxTestSchedulers {
     private final Func0<Integer> backgroundEventsCount;
     private final Logger logger;
 
-    private Subscriber delegateSubscriber;
+    private Subscriber<? super Object> delegateSubscriber;
     private TestSubscriber<? super Object> testSubscriber;
 
     public RxTestSchedulers() {
@@ -32,7 +32,7 @@ public class RxTestSchedulers {
         delegateSubscriber = builder.delegateSubscriber;
         backgroundEventsCount = builder.backgroundEventsCount;
         logger = builder.logger;
-        testSubscriber = TestSubscriber.create(new LogSubscriber(logger, delegateSubscriber));
+        testSubscriber = TestSubscriber.create(new LogSubscriber<>(logger, delegateSubscriber));
     }
 
     public static Builder builder() {
