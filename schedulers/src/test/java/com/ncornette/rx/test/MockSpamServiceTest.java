@@ -50,7 +50,7 @@ public class MockSpamServiceTest {
                         assertThat(spams).hasSize(6);
                     }
                 })
-                .subscribe(rxTestSchedulers.newTestSubscriber(new Subscriber<List<Spam>>() {
+                .subscribe(rxTestSchedulers.newTestSubscriber(new Subscriber<Object>() {
                     @Override
                     public void onCompleted() {
 
@@ -62,7 +62,7 @@ public class MockSpamServiceTest {
                     }
 
                     @Override
-                    public void onNext(List<Spam> t) {
+                    public void onNext(Object t) {
                         System.out.println(t);
                     }
                 }));

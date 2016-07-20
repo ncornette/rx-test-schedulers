@@ -164,18 +164,18 @@ public class RxTestSchedulers {
         return backgroundScheduler;
     }
 
-    public TestSubscriber<Object> testSubscriber() {
+    public TestSubscriber<? super Object> testSubscriber() {
         return testSubscriber;
     }
 
-    public TestSubscriber<Object> newTestSubscriber() {
-        delegateSubscriber = null;
-        this.testSubscriber = TestSubscriber.create(LogSubscriber.create(logger, null));
-        return this.testSubscriber;
+    public TestSubscriber<? super Object> newTestSubscriber() {
+        return newTestSubscriber(null);
     }
 
-    public <T> TestSubscriber<T> newTestSubscriber(Subscriber<T> subscriber) {
-        return TestSubscriber.create(LogSubscriber.create(logger, subscriber));
+    public TestSubscriber<? super Object> newTestSubscriber(Subscriber<Object> subscriber) {
+        delegateSubscriber = subscriber;
+        this.testSubscriber = TestSubscriber.create(LogSubscriber.create(logger, subscriber));
+        return this.testSubscriber;
     }
 
     public Logger logger() {
@@ -192,7 +192,7 @@ public class RxTestSchedulers {
         private TestScheduler foregroundScheduler;
         private TestScheduler backgroundScheduler;
         private Func0<Integer> backgroundEventsCount;
-        private Subscriber<Object> delegateSubscriber;
+        private Subscriber<? super Object> delegateSubscriber;
         private Logger logger;
 
         private Builder() {
