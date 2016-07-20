@@ -12,6 +12,11 @@ import rx.functions.Action1;
 import rx.functions.Func0;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class MockSpamServiceTest {
 
@@ -43,6 +48,8 @@ public class MockSpamServiceTest {
 
     @Test
     public void testCustomSubscriber() throws Exception {
+        Subscriber mockSubscriber = mock(Subscriber.class);
+
         testServiceClient.latestSpams(6)
                 .doOnNext(new Action1<List<Spam>>() {
                     @Override
@@ -50,25 +57,14 @@ public class MockSpamServiceTest {
                         assertThat(spams).hasSize(6);
                     }
                 })
-                .subscribe(rxTestSchedulers.newTestSubscriber(new Subscriber<Object>() {
-                    @Override
-                    public void onCompleted() {
+                .subscribe(rxTestSchedulers.newTestSubscriber(mockSubscriber));
 
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onNext(Object t) {
-                        System.out.println(t);
-                    }
-                }));
 
         assertThat(rxTestSchedulers.triggerBackgroundRequests("Generate 6 Spams")).isEqualTo(1);
+        verify(mockSubscriber, never()).onNext(anyObject());
         assertThat(rxTestSchedulers.triggerForegroundEvents("List of 6 Spams")).isEqualTo(1);
+        verify(mockSubscriber, times(1)).onNext(anyObject());
+        verify(mockSubscriber, times(1)).onCompleted();
 
         rxTestSchedulers.testSubscriber().assertCompleted();
     }
