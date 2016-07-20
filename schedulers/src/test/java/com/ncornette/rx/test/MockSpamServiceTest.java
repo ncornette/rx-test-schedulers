@@ -1,6 +1,6 @@
 package com.ncornette.rx.test;
 
-import com.ncornette.rx.test.service.SpamRXService.Spam;
+import com.ncornette.rx.test.service.SpamRXService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,13 +44,13 @@ public class MockSpamServiceTest {
     @Test
     public void testCustomSubscriber() throws Exception {
         testServiceClient.latestSpams(6)
-                .doOnNext(new Action1<List<Spam>>() {
+                .doOnNext(new Action1<List<SpamRXService.Spam>>() {
                     @Override
-                    public void call(List<Spam> spams) {
+                    public void call(List<SpamRXService.Spam> spams) {
                         assertThat(spams).hasSize(6);
                     }
                 })
-                .subscribe(rxTestSchedulers.newTestSubscriber(new Subscriber<List<Spam>>() {
+                .subscribe(rxTestSchedulers.newTestSubscriber(new Subscriber<Object>() {
                     @Override
                     public void onCompleted() {
 
@@ -62,7 +62,7 @@ public class MockSpamServiceTest {
                     }
 
                     @Override
-                    public void onNext(List<Spam> t) {
+                    public void onNext(Object t) {
                         System.out.println(t);
                     }
                 }));

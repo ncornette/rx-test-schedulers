@@ -2,18 +2,18 @@ package com.ncornette.rx.test;
 
 import rx.Subscriber;
 
-public class LogSubscriber<T> extends Subscriber<T> {
+public class LogSubscriber extends Subscriber<Object> {
 
     private RxTestSchedulers.Logger logger;
-    private Subscriber<T> subscriber;
+    private Subscriber<Object> subscriber;
 
-    public LogSubscriber(RxTestSchedulers.Logger logger, Subscriber<T> subscriber) {
+    public LogSubscriber(RxTestSchedulers.Logger logger, Subscriber<Object> subscriber) {
         this.logger = logger;
         if (subscriber == null) {
-            this.subscriber = new Subscriber<T>() {
+            this.subscriber = new Subscriber<Object>() {
                 @Override public void onCompleted() {}
                 @Override public void onError(Throwable e) {}
-                @Override public void onNext(T o) {}
+                @Override public void onNext(Object o) {}
             };
         } else {
             this.subscriber = subscriber;
@@ -33,13 +33,9 @@ public class LogSubscriber<T> extends Subscriber<T> {
         }
 
         @Override
-        public void onNext(T o) {
+        public void onNext(Object o) {
             logger.i("--> onNext: " + o);
             subscriber.onNext(o);
         }
-
-    public static <T> Subscriber<T> create(RxTestSchedulers.Logger logger, Subscriber<T> subscriber) {
-        return new LogSubscriber<>(logger, subscriber);
     }
-}
 
