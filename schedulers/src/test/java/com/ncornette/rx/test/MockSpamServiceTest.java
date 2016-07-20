@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+import rx.Subscriber;
 import rx.functions.Action1;
 import rx.functions.Func0;
 
@@ -41,7 +42,7 @@ public class MockSpamServiceTest {
     }
 
     @Test
-    public void testCustom() throws Exception {
+    public void testCustomSubscriber() throws Exception {
         testServiceClient.latestSpams(6)
                 .doOnNext(new Action1<List<Spam>>() {
                     @Override
@@ -49,7 +50,22 @@ public class MockSpamServiceTest {
                         assertThat(spams).hasSize(6);
                     }
                 })
-                .subscribe(rxTestSchedulers.newTestSubscriber());
+                .subscribe(rxTestSchedulers.newTestSubscriber(new Subscriber<List<Spam>>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(List<Spam> t) {
+                        System.out.println(t);
+                    }
+                }));
 
         assertThat(rxTestSchedulers.triggerBackgroundRequests("Generate 6 Spams")).isEqualTo(1);
         assertThat(rxTestSchedulers.triggerForegroundEvents("List of 6 Spams")).isEqualTo(1);
