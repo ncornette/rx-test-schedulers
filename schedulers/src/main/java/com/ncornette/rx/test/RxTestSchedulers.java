@@ -16,9 +16,11 @@ public class RxTestSchedulers {
 
     private final TestScheduler foregroundScheduler;
     private final TestScheduler backgroundScheduler;
-    private final TestSubscriberWrapper subscriberWrapper;
     private final Func0<Integer> backgroundEventsCount;
     private final Logger logger;
+
+    private Subscriber delegateSubscriber;
+    private TestSubscriber<? super Object> testSubscriber;
 
     public RxTestSchedulers() {
         this(builder().build().newBuilder());
@@ -27,9 +29,10 @@ public class RxTestSchedulers {
     private RxTestSchedulers(Builder builder) {
         foregroundScheduler = builder.foregroundScheduler;
         backgroundScheduler = builder.backgroundScheduler;
-        subscriberWrapper = builder.subscriberWrapper;
+        delegateSubscriber = builder.delegateSubscriber;
         backgroundEventsCount = builder.backgroundEventsCount;
         logger = builder.logger;
+        testSubscriber = TestSubscriber.create(new LogSubscriber(logger, delegateSubscriber));
     }
 
     public static Builder builder() {
@@ -45,9 +48,8 @@ public class RxTestSchedulers {
         Builder builder = new Builder();
         builder.foregroundScheduler = copy.foregroundScheduler;
         builder.backgroundScheduler = copy.backgroundScheduler;
-        builder.subscriberWrapper = copy.subscriberWrapper;
+        builder.delegateSubscriber = copy.delegateSubscriber;
         builder.backgroundEventsCount = copy.backgroundEventsCount;
-        builder.delegateSubscriber = copy.subscriberWrapper.delegateSubscriber;
         builder.logger = copy.logger;
         return builder;
     }
@@ -163,15 +165,17 @@ public class RxTestSchedulers {
     }
 
     public TestSubscriber<Object> testSubscriber() {
-        return subscriberWrapper.testSubscriber;
+        return testSubscriber;
     }
 
-    public TestSubscriber<? super Object> newTestSubscriber() {
-        return subscriberWrapper.subscriber();
+    public TestSubscriber<Object> newTestSubscriber() {
+        delegateSubscriber = null;
+        this.testSubscriber = TestSubscriber.create(LogSubscriber.create(logger, null));
+        return this.testSubscriber;
     }
 
-    public TestSubscriber<Object> newTestSubscriber(Subscriber<Object> subscriber) {
-        return subscriberWrapper.subscriber(subscriber);
+    public <T> TestSubscriber<T> newTestSubscriber(Subscriber<T> subscriber) {
+        return TestSubscriber.create(LogSubscriber.create(logger, subscriber));
     }
 
     public Logger logger() {
@@ -187,7 +191,6 @@ public class RxTestSchedulers {
     public static final class Builder {
         private TestScheduler foregroundScheduler;
         private TestScheduler backgroundScheduler;
-        private TestSubscriberWrapper subscriberWrapper;
         private Func0<Integer> backgroundEventsCount;
         private Subscriber<Object> delegateSubscriber;
         private Logger logger;
@@ -237,34 +240,7 @@ public class RxTestSchedulers {
                 logger = new Logger();
             }
 
-            subscriberWrapper = new TestSubscriberWrapper(delegateSubscriber, logger);
-
             return new RxTestSchedulers(this);
-        }
-    }
-
-    private static class TestSubscriberWrapper {
-
-        private final Logger logger;
-        private Subscriber<Object> delegateSubscriber;
-        private TestSubscriber<Object> testSubscriber;
-
-        public TestSubscriberWrapper(Subscriber<Object> subscriber, Logger logger) {
-            this.logger = logger;
-            testSubscriber = getObjectTestSubscriber(subscriber);
-        }
-
-        public TestSubscriber<Object> subscriber() {
-            testSubscriber = getObjectTestSubscriber(delegateSubscriber);
-            return testSubscriber;
-        }
-        public TestSubscriber<Object> subscriber(Subscriber<Object> subscriber) {
-            testSubscriber = getObjectTestSubscriber(subscriber);
-            return testSubscriber;
-        }
-
-        private TestSubscriber<Object> getObjectTestSubscriber(Subscriber<Object> subscriber) {
-            return TestSubscriber.create(new LogSubscriber(logger, subscriber));
         }
     }
 
