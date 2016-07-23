@@ -11,9 +11,9 @@ public class LogSubscriber<T> extends Subscriber<T> {
         this.logger = logger;
         if (subscriber == null) {
             this.subscriber = new Subscriber<T>() {
-                @Override public void onCompleted() {}
-                @Override public void onError(Throwable e) {}
-                @Override public void onNext(T o) {}
+                @Override public void onCompleted() {/* NO-OP */}
+                @Override public void onError(Throwable e) {/* NO-OP */}
+                @Override public void onNext(T o) {/* NO-OP */}
             };
         } else {
             this.subscriber = subscriber;

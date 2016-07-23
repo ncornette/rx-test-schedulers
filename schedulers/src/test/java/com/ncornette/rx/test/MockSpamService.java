@@ -7,7 +7,6 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import rx.Observable;
-import rx.Subscriber;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.TestScheduler;
