@@ -2,18 +2,15 @@ package com.ncornette.rx.test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.InputStream;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import rx.Observable;
+import okio.Buffer;
 import rx.functions.Func0;
-import rx.functions.Func1;
-import rx.observables.StringObservable;
 
 /**
  * Created by nic on 11/07/16.
@@ -59,23 +56,10 @@ public final class RxTestOkHttp {
         return builder;
     }
 
-    public void enqueueResponseFromFile(final String resourceFilePath) throws FileNotFoundException {
-        Observable<String> o = StringObservable
-                .join(StringObservable.using(new StringObservable.UnsafeFunc0<Reader>() {
-                    @Override
-                    public Reader call() throws Exception {
-                        return new InputStreamReader(resourceFilePath.getClass()
-                                .getResourceAsStream(resourceFilePath));
-                    }
-                }, new Func1<Reader, Observable<String>>() {
-                    @Override
-                    public Observable<String> call(Reader reader) {
-                        return StringObservable.from(reader);
-                    }
-                }), "");
-
-        mockWebServer.enqueue(new MockResponse().setBody(o.toBlocking().single()));
-
+    public void enqueueResponseFromFile(final String resourceFilePath) throws IOException {
+        InputStream resourceAsStream = resourceFilePath.getClass().getResourceAsStream(resourceFilePath);
+        mockWebServer.enqueue(new MockResponse().setBody(new Buffer().readFrom(resourceAsStream)));
+        resourceAsStream.close();
     }
 
     public void enqueueResponse(String s) throws FileNotFoundException {

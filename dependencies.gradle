@@ -14,7 +14,6 @@ ext {
             mockWebServer         : "com.squareup.okhttp3:mockwebserver:$okhttp3Version",
 
             rxJava                : "io.reactivex:rxjava:1.1.6",
-            rxJavaString          : "io.reactivex:rxjava-string:1.1.0",
 
             junit                 : "junit:junit:4.11",
             assertJ               : "org.assertj:assertj-core:2.2.0",
