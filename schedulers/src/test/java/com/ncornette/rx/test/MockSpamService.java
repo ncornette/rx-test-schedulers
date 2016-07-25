@@ -7,6 +7,7 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import rx.Observable;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.TestScheduler;
@@ -17,6 +18,7 @@ import rx.subjects.PublishSubject;
  */
 public class MockSpamService implements SpamRXService {
 
+    public static final int MAX_RESULTS = 120;
     private final TestScheduler backgroundTestScheduler;
     private final TestScheduler foregroundTestScheduler;
     private final RxTestSchedulers.Logger logger;
@@ -63,9 +65,17 @@ public class MockSpamService implements SpamRXService {
                 .observeOn(foregroundTestScheduler);
     }
 
-    private Observable<List<Spam>> listOfSpams(int count) {
+    private Observable<List<Spam>> listOfSpams(final int count) {
         return Observable
                 .range(0, count)
+                .doOnSubscribe(new Action0() {
+                    @Override
+                    public void call() {
+                        if (count > MAX_RESULTS) {
+                            throw new IllegalArgumentException("max results: " + MAX_RESULTS);
+                        }
+                    }
+                })
                 .map(new Func1<Integer, Spam>() {
                     @Override
                     public Spam call(Integer i) {

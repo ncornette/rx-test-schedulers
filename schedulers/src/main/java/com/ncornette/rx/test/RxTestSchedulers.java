@@ -117,8 +117,7 @@ public class RxTestSchedulers {
 
     private void assertNoOnErrorEvents(int beforeErrorCount, int afterErrorCount) throws OnErrorEventsException {
         if (afterErrorCount > beforeErrorCount) {
-            throw new OnErrorEventsException(
-                    MessageFormat.format("{0} more Errors", afterErrorCount > beforeErrorCount),
+            throw new OnErrorEventsException("Unexpected error event",
                     testSubscriber().getOnErrorEvents().get(beforeErrorCount));
         }
     }
@@ -253,6 +252,7 @@ public class RxTestSchedulers {
 
         private int currentLevelValue;
         private final PrintStream out;
+        private final PrintStream err;
 
         public Logger() {
             this(Level.DEBUG);
@@ -265,6 +265,7 @@ public class RxTestSchedulers {
         public Logger(Level level, PrintStream out) {
             this.currentLevelValue = level.value;
             this.out = out;
+            this.err = System.err;
         }
 
         public void v(String s) {
@@ -295,9 +296,9 @@ public class RxTestSchedulers {
         private void log(Level level, String s) {
             if(currentLevelValue >= level.value) {
                 if (level.value > Level.ERROR.value) {
-                    System.out.println(s);
+                    out.println(s);
                 } else {
-                    System.err.println(s);
+                    err.println(s);
                 }
             }
         }
@@ -305,9 +306,9 @@ public class RxTestSchedulers {
         private void log(Level level, String s, Object... o) {
             if(currentLevelValue >= level.value) {
                 if (level.value > Level.ERROR.value) {
-                    System.out.println(MessageFormat.format(s, o));
+                    out.println(MessageFormat.format(s, o));
                 } else {
-                    System.err.println(MessageFormat.format(s, o));
+                    err.println(MessageFormat.format(s, o));
                 }
             }
         }

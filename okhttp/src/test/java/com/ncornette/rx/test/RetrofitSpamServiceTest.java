@@ -6,8 +6,13 @@ import com.ncornette.rx.test.service.SpamRXService;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.logging.Level;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.SocketPolicy;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -30,8 +35,9 @@ public class RetrofitSpamServiceTest extends SpamServiceAssertions {
         // testing schedulers
         rxTestOkhttp = new RxTestOkHttp();
 
+        java.util.logging.Logger.getLogger(MockWebServer.class.getName()).setLevel(Level.OFF);
         rxTestSchedulers = rxTestOkhttp.testSchedulers().newBuilder()
-                .logger(Logger.info())
+                .logger(Logger.verbose())
                 .build();
 
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
@@ -40,14 +46,14 @@ public class RetrofitSpamServiceTest extends SpamServiceAssertions {
                 .addInterceptor(loggingInterceptor)
                 .build();
 
-        Retrofit build = new Retrofit.Builder()
+        Retrofit retrofit = new Retrofit.Builder()
                 .client(okHttpClient)
                 .baseUrl(rxTestOkhttp.mockWebServer().url("/"))
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        RetrofitSpamService retrofitService = build.create(RetrofitSpamService.class);
+        RetrofitSpamService retrofitService = retrofit.create(RetrofitSpamService.class);
 
         spamService = new RetrofitSpamServiceWrapper(
                 rxTestSchedulers.testBackgroundScheduler(),
@@ -73,7 +79,7 @@ public class RetrofitSpamServiceTest extends SpamServiceAssertions {
     public void assertSimpleCall() throws Exception {
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=1.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_12_page=1.json");
-
+        new MockWebServer();
         super.assertSimpleCall();
     }
 
@@ -130,5 +136,21 @@ public class RetrofitSpamServiceTest extends SpamServiceAssertions {
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=EMPTY.json");
 
         super.assertCachedResultAfterComplete();
+    }
+
+    @Test
+    @Override
+    public void checkBackgroundError() throws Exception {
+        rxTestOkhttp.mockWebServer().enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START));
+
+        super.checkBackgroundError();
+    }
+
+    @Test
+    @Override
+    public void checkHandleUnexpectError() throws Exception {
+        rxTestOkhttp.mockWebServer().enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START));
+
+        super.checkHandleUnexpectError();
     }
 }

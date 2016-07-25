@@ -13,6 +13,7 @@ import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public abstract class SpamServiceAssertions {
 
@@ -104,7 +105,7 @@ public abstract class SpamServiceAssertions {
 
         testServiceClient.searchSpams("eggs", 6, pagePublishSubject).subscribe(rxTestSchedulers.testSubscriber());
 
-        System.out.println(rxTestSchedulers.triggerBackgroundRequests());
+        rxTestSchedulers.triggerBackgroundRequests();
 
         pagePublishSubject.onNext(1);
         assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
@@ -199,6 +200,36 @@ public abstract class SpamServiceAssertions {
 
         assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(0);
         assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(3);
+    }
+
+    @Test
+    public void checkBackgroundError() throws Exception {
+
+        Observable<List<Spam>> listObservable = testServiceClient.latestSpams(125);
+        listObservable.subscribe(rxTestSchedulers.testSubscriber());
+
+        rxTestSchedulers.triggerBackgroundRequests();
+        assertThat(rxTestSchedulers.triggerForegroundEventsWithError()).isInstanceOf(Exception.class);
+
+        rxTestSchedulers.testSubscriber().assertNotCompleted();
+    }
+
+    @Test
+    public void checkHandleUnexpectError() throws Exception {
+
+        Observable<List<Spam>> listObservable = testServiceClient.latestSpams(125);
+        listObservable.subscribe(rxTestSchedulers.testSubscriber());
+
+        rxTestSchedulers.triggerBackgroundRequests();
+
+        try {
+            rxTestSchedulers.triggerForegroundEvents();
+            fail("Should throw exception type: "+RxTestSchedulers.OnErrorEventsException.class.getName());
+        } catch (RxTestSchedulers.OnErrorEventsException e) {
+            System.out.println(e);
+        }
+
+        rxTestSchedulers.testSubscriber().assertNotCompleted();
     }
 
 }

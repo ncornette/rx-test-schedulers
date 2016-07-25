@@ -36,7 +36,7 @@ public class MockSpamServiceTest extends SpamServiceAssertions {
                         return testServiceClient.getRequestCount();
                     }
                 })
-                .logger(Logger.error())
+                .logger(Logger.verbose())
                 .build();
 
         testServiceClient = new MockSpamService(
@@ -115,5 +115,16 @@ public class MockSpamServiceTest extends SpamServiceAssertions {
     @Override
     public void assertCachedResultAfterComplete() throws Exception {
         super.assertCachedResultAfterComplete();
+    }
+
+    @Test
+    @Override
+    public void checkBackgroundError() throws Exception {
+        super.checkBackgroundError();
+    }
+
+    @Override
+    public void checkHandleUnexpectError() throws Exception {
+        super.checkHandleUnexpectError();
     }
 }
