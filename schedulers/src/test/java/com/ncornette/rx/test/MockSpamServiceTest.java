@@ -1,5 +1,7 @@
 package com.ncornette.rx.test;
 
+import com.ncornette.rx.test.RxTestSchedulers.Logger;
+import com.ncornette.rx.test.service.SpamRXService;
 import com.ncornette.rx.test.service.SpamRXService.Spam;
 
 import org.junit.Before;
@@ -18,13 +20,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class MockSpamServiceTest {
+public class MockSpamServiceTest extends SpamServiceAssertions {
 
     private MockSpamService testServiceClient;
     private RxTestSchedulers rxTestSchedulers;
-    private SpamServiceAssertions spamServiceTest;
 
     @Before
+    @Override
     public void setUp() throws Exception {
 
         rxTestSchedulers = RxTestSchedulers.builder()
@@ -34,16 +36,25 @@ public class MockSpamServiceTest {
                         return testServiceClient.getRequestCount();
                     }
                 })
+                .logger(Logger.error())
                 .build();
-
-        rxTestSchedulers.logger().level(RxTestSchedulers.Logger.Level.VERBOSE);
 
         testServiceClient = new MockSpamService(
                 rxTestSchedulers.testBackgroundScheduler(),
-                rxTestSchedulers.testForegroundScheduler()
+                rxTestSchedulers.testForegroundScheduler(),
+                rxTestSchedulers.logger()
         );
+        super.setUp();
+    }
 
-        spamServiceTest = new SpamServiceAssertions(testServiceClient, rxTestSchedulers);
+    @Override
+    protected RxTestSchedulers rxTestSchedulers() {
+        return rxTestSchedulers;
+    }
+
+    @Override
+    protected SpamRXService testClient() {
+        return testServiceClient;
     }
 
     @Test
@@ -71,33 +82,38 @@ public class MockSpamServiceTest {
 
 
     @Test
-    public void test() throws Exception {
-        spamServiceTest.assertSimpleCall();
+    @Override
+    public void assertSimpleCall() throws Exception {
+        super.assertSimpleCall();
     }
 
     @Test
-    public void test_DISTINCT_PAGE_UNTIL_CHANGED() throws Exception {
-        spamServiceTest.assertDistinctPageUntilChanged();
+    @Override
+    public void assertDistinctPageUntilChanged() throws Exception {
+        super.assertDistinctPageUntilChanged();
     }
 
     @Test
-    public void test_LOAD_3_PAGES() throws Exception {
-        spamServiceTest.assertLoad3Pages();
+    @Override
+    public void assertLoad3Pages() throws Exception {
+        super.assertLoad3Pages();
     }
 
     @Test
-    public void test_COMPLETES_AT_FIRST_EMPTYLIST() throws Exception {
-        spamServiceTest.assertCompletesAtFirstEmptyList();
+    @Override
+    public void assertCompletesAtFirstEmptyList() throws Exception {
+        super.assertCompletesAtFirstEmptyList();
     }
 
     @Test
-    public void test_CACHED_RESULT() throws Exception {
-        spamServiceTest.assertCachedResult();
+    @Override
+    public void assertCachedResult() throws Exception {
+        super.assertCachedResult();
     }
 
     @Test
-    public void test_CACHED_RESULT_COMPLETED() throws Exception {
-        spamServiceTest.assertCachedResultAfterComplete();
+    @Override
+    public void assertCachedResultAfterComplete() throws Exception {
+        super.assertCachedResultAfterComplete();
     }
-
 }

@@ -3,7 +3,7 @@ package com.ncornette.rx.test;
 import com.ncornette.rx.test.service.SpamRXService;
 import com.ncornette.rx.test.service.SpamRXService.Spam;
 
-import org.assertj.core.api.Assertions;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -14,18 +14,22 @@ import rx.subjects.PublishSubject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SpamServiceAssertions {
+public abstract class SpamServiceAssertions {
 
-    protected SpamRXService testServiceClient;
-    protected RxTestSchedulers rxTestSchedulers;
+    private SpamRXService testServiceClient;
+    private RxTestSchedulers rxTestSchedulers;
 
-    public SpamServiceAssertions(SpamRXService testServiceClient,
-                                 RxTestSchedulers rxTestSchedulers) {
-
-        this.testServiceClient = testServiceClient;
-        this.rxTestSchedulers = rxTestSchedulers;
+    @Before
+    public void setUp() throws Exception {
+        this.testServiceClient = testClient();
+        this.rxTestSchedulers = rxTestSchedulers();
     }
 
+    protected abstract RxTestSchedulers rxTestSchedulers();
+
+    protected abstract SpamRXService testClient();
+
+    @Test
     public void assertSimpleCall() throws Exception {
 
         testServiceClient.latestSpams(6)
@@ -59,6 +63,7 @@ public class SpamServiceAssertions {
         rxTestSchedulers.testSubscriber().assertCompleted();
     }
 
+    @Test
     public void assertDistinctPageUntilChanged() throws Exception {
 
         PublishSubject<Integer> pagePublishSubject = PublishSubject.create();
@@ -99,7 +104,7 @@ public class SpamServiceAssertions {
 
         testServiceClient.searchSpams("eggs", 6, pagePublishSubject).subscribe(rxTestSchedulers.testSubscriber());
 
-        rxTestSchedulers.triggerBackgroundRequests();
+        System.out.println(rxTestSchedulers.triggerBackgroundRequests());
 
         pagePublishSubject.onNext(1);
         assertThat(rxTestSchedulers.triggerBackgroundRequests()).isEqualTo(1);
@@ -114,6 +119,7 @@ public class SpamServiceAssertions {
         assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(1);
     }
 
+    @Test
     public void assertCompletesAtFirstEmptyList() throws Exception {
 
         PublishSubject<Integer> pagePublishSubject = PublishSubject.create();
@@ -145,6 +151,7 @@ public class SpamServiceAssertions {
         assertThat(rxTestSchedulers.triggerForegroundEvents()).isEqualTo(0);
     }
 
+    @Test
     public void assertCachedResult() throws Exception {
 
         PublishSubject<Integer> pagePublishSubject = PublishSubject.create();
@@ -169,6 +176,7 @@ public class SpamServiceAssertions {
 
     }
 
+    @Test
     public void assertCachedResultAfterComplete() throws Exception {
 
         PublishSubject<Integer> pagePublishSubject = PublishSubject.create();

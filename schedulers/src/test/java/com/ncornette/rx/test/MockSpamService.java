@@ -19,11 +19,17 @@ public class MockSpamService implements SpamRXService {
 
     private final TestScheduler backgroundTestScheduler;
     private final TestScheduler foregroundTestScheduler;
+    private final RxTestSchedulers.Logger logger;
     private int requestCount;
 
     public MockSpamService(TestScheduler backgroundTestScheduler, TestScheduler foregroundTestScheduler) {
+        this(backgroundTestScheduler, foregroundTestScheduler, new RxTestSchedulers.Logger());
+    }
+
+    public MockSpamService(TestScheduler backgroundTestScheduler, TestScheduler foregroundTestScheduler, RxTestSchedulers.Logger logger) {
         this.backgroundTestScheduler = backgroundTestScheduler;
         this.foregroundTestScheduler = foregroundTestScheduler;
+        this.logger = logger;
     }
 
     @Override
@@ -69,7 +75,7 @@ public class MockSpamService implements SpamRXService {
                 .doOnNext(new Action1<Spam>() {
                     @Override
                     public void call(Spam spam) {
-                        System.out.println(MessageFormat.format("<-- {0}", spam));
+                        logger.i("<-- {0}", spam);
                     }
                 })
                 .toList()

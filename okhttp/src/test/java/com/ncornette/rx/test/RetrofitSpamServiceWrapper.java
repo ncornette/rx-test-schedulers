@@ -5,7 +5,6 @@ import com.ncornette.rx.test.service.SpamRXService;
 import java.util.List;
 
 import rx.Observable;
-import rx.Subscriber;
 import rx.functions.Func1;
 import rx.schedulers.TestScheduler;
 import rx.subjects.PublishSubject;
@@ -57,23 +56,5 @@ public class RetrofitSpamServiceWrapper implements SpamRXService {
                 .subscribeOn(backgroundTestScheduler)
                 .observeOn(foregroundTestScheduler);
     }
-
-    public static class LogSpamSubscriber extends Subscriber<Object> {
-        @Override
-        public void onCompleted() {
-            System.out.println("--> onCompleted.");
-        }
-
-        @Override
-        public void onError(Throwable e) {
-            System.out.println("--> onError: " + e);
-        }
-
-        @Override
-        public void onNext(Object o) {
-            System.out.println("--> onNext: " + o);
-        }
-    }
-
 
 }

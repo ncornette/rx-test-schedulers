@@ -1,5 +1,6 @@
 package com.ncornette.rx.test;
 
+import com.ncornette.rx.test.RxTestSchedulers.Logger;
 import com.ncornette.rx.test.service.SpamRXService;
 
 import org.junit.Before;
@@ -17,19 +18,21 @@ import retrofit2.converter.gson.GsonConverterFactory;
  *
  * @author nic, @date 7/11/16 2:14 PM
  */
-public class RetrofitSpamServiceTest {
+public class RetrofitSpamServiceTest extends SpamServiceAssertions {
 
-    protected SpamRXService testServiceClient;
+    protected SpamRXService spamService;
     protected RxTestSchedulers rxTestSchedulers;
     protected RxTestOkHttp rxTestOkhttp;
-    private SpamServiceAssertions spamServiceTest;
 
     @Before
     public void setUp() throws Exception {
 
         // testing schedulers
         rxTestOkhttp = new RxTestOkHttp();
-        rxTestSchedulers = rxTestOkhttp.testSchedulers();
+
+        rxTestSchedulers = rxTestOkhttp.testSchedulers().newBuilder()
+                .logger(Logger.info())
+                .build();
 
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
@@ -46,71 +49,86 @@ public class RetrofitSpamServiceTest {
 
         RetrofitSpamService retrofitService = build.create(RetrofitSpamService.class);
 
-        testServiceClient = new RetrofitSpamServiceWrapper(
+        spamService = new RetrofitSpamServiceWrapper(
                 rxTestSchedulers.testBackgroundScheduler(),
                 rxTestSchedulers.testForegroundScheduler(),
                 retrofitService
         );
 
-        spamServiceTest = new SpamServiceAssertions(testServiceClient, rxTestSchedulers);
+        super.setUp();
+    }
+
+    @Override
+    protected RxTestSchedulers rxTestSchedulers() {
+        return rxTestSchedulers;
+    }
+
+    @Override
+    protected SpamRXService testClient() {
+        return spamService;
     }
 
     @Test
-    public void test_SIMPLE_CALL() throws Exception {
+    @Override
+    public void assertSimpleCall() throws Exception {
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=1.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_12_page=1.json");
 
-        spamServiceTest.assertSimpleCall();
+        super.assertSimpleCall();
     }
 
     @Test
-    public void test_DISTINCT_PAGE_UNTIL_CHANGED() throws Exception {
+    @Override
+    public void assertDistinctPageUntilChanged() throws Exception {
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=1.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=2.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=3.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=EMPTY.json");
 
-        spamServiceTest.assertDistinctPageUntilChanged();
+        super.assertDistinctPageUntilChanged();
     }
 
     @Test
-    public void test_LOAD_3_PAGES() throws Exception {
+    @Override
+    public void assertLoad3Pages() throws Exception {
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=1.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=2.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=3.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=EMPTY.json");
 
-        spamServiceTest.assertLoad3Pages();
+        super.assertLoad3Pages();
     }
 
     @Test
-    public void test_COMPLETES_AT_FIRST_EMPTYLIST() throws Exception {
+    @Override
+    public void assertCompletesAtFirstEmptyList() throws Exception {
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=1.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=2.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=3.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=EMPTY.json");
 
-        spamServiceTest.assertCompletesAtFirstEmptyList();
+        super.assertCompletesAtFirstEmptyList();
     }
 
     @Test
-    public void test_CACHED_RESULT() throws Exception {
+    @Override
+    public void assertCachedResult() throws Exception {
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=1.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=2.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=3.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=EMPTY.json");
 
-        spamServiceTest.assertCachedResult();
+        super.assertCachedResult();
     }
 
     @Test
-    public void test_CACHED_RESULT_COMPLETED() throws Exception {
+    @Override
+    public void assertCachedResultAfterComplete() throws Exception {
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=1.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=2.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=3.json");
         rxTestOkhttp.enqueueResponseFromFile("/spam_results_6_page=EMPTY.json");
 
-        spamServiceTest.assertCachedResultAfterComplete();
+        super.assertCachedResultAfterComplete();
     }
-
 }

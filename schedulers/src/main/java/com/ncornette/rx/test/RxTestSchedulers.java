@@ -1,5 +1,6 @@
 package com.ncornette.rx.test;
 
+import java.io.PrintStream;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
@@ -251,9 +252,21 @@ public class RxTestSchedulers {
     public static class Logger {
 
         private int currentLevelValue;
+        private final PrintStream out;
+
         public Logger() {
-            this.currentLevelValue = Level.DEBUG.value;
+            this(Level.DEBUG);
         }
+
+        public Logger(Level level) {
+            this(level, System.out);
+        }
+
+        public Logger(Level level, PrintStream out) {
+            this.currentLevelValue = level.value;
+            this.out = out;
+        }
+
         public void v(String s) {
             log(Level.VERBOSE, s);
         }
@@ -301,6 +314,22 @@ public class RxTestSchedulers {
 
         public void level(Level currentLevel) {
             this.currentLevelValue = currentLevel.value;
+        }
+
+        public static Logger error() {
+            return new RxTestSchedulers.Logger(Level.ERROR);
+        }
+
+        public static Logger info() {
+            return new RxTestSchedulers.Logger(Level.INFO);
+        }
+
+        public static Logger debug() {
+            return new RxTestSchedulers.Logger(Level.DEBUG);
+        }
+
+        public static Logger verbose() {
+            return new RxTestSchedulers.Logger(Level.VERBOSE);
         }
 
         public enum Level {
